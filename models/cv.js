@@ -6,7 +6,6 @@ const { v4: uuidv4 } = require('uuid');
 const cvSchema = new Schema({
     id: {
         type: String,
-        required: true,
         unique: true,
         default: () => uuidv4()
     },
@@ -25,15 +24,15 @@ const cvSchema = new Schema({
     },
     title: {
         type: String,
-        required: true
+        required: false
     },
     location: {
         type: String,
-        required: true
+        required: false
     },
     summary: {
         type: String,
-        required: true
+        required: false
     },
     education: [{
         type: Schema.Types.ObjectId,

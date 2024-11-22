@@ -5,11 +5,12 @@ const User = require('../models/user');
 const jwt = require('jsonwebtoken'); 
 const router = express.Router();
 require('dotenv').config(); 
+
 router.post('/register', async (req, res) => {
     try {
-        const { firstname, lastname, email, password } = req.body;
+        const { firstname, lastname, email, password, roleId } = req.body;
 
-        if (!firstname || !lastname || !email || !password) {
+        if (!firstname || !lastname || !email || !password || !roleId) {
             return res.status(400).json({ message: 'All fields are required' });
         }
 
@@ -26,7 +27,8 @@ router.post('/register', async (req, res) => {
             firstname,
             lastname,
             email,
-            password: hashedPassword, 
+            password: hashedPassword,
+            roleId
         });
 
         await newUser.save();
@@ -57,7 +59,7 @@ router.post('/login', async (req, res) => {
         }
 
         const token = jwt.sign(
-            { uuid: user.uuid, email: user.email },
+            { uuid: user.uuid, email: user.email, roleId: user.roleId },
             process.env.JWT_SECRET, 
             { expiresIn: '1h' }
         );
@@ -69,7 +71,8 @@ router.post('/login', async (req, res) => {
                 uuid: user.uuid,
                 firstname: user.firstname,
                 lastname: user.lastname,
-                email: user.email
+                email: user.email,
+                roleId: user.roleId
             }
         });
     } catch (error) {

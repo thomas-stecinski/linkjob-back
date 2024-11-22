@@ -5,7 +5,6 @@ const { v4: uuidv4 } = require('uuid');
 const userSchema = new Schema({
     id: {
         type: String,
-        required: true,
         unique: true,
         default: () => uuidv4()
     },
@@ -29,7 +28,7 @@ const userSchema = new Schema({
     roleId: {
         type: Schema.Types.ObjectId,
         ref: 'Role',
-        required: true
+        required: true,
     }
 }, { timestamps: true });
 

@@ -5,7 +5,6 @@ const { v4: uuidv4 } = require('uuid');
 const roleSchema = new Schema({
     id: {
         type: String,
-        required: true,
         unique: true,
         default: () => uuidv4()
     },
@@ -13,6 +12,13 @@ const roleSchema = new Schema({
         type: String,
         required: true,
         unique: true
+    },
+    permissions: [{
+        type: String
+    }],
+    description: {
+        type: String,
+        required: true
     }
 }, { timestamps: true });
 

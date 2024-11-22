@@ -4,7 +4,6 @@ const { v4: uuidv4 } = require('uuid');
 const educationSchema = new Schema({
     id: {
         type: String,
-        required: true,
         unique: true,
         index:true,
         default: () => uuidv4()
@@ -34,11 +33,11 @@ const educationSchema = new Schema({
     },
     startDate: {
         type: Date,
-        required: true
+        required: false
     },
     endDate: {
         type: Date,
-        required: true
+        required: false
     },
     description: {
         type: String,
