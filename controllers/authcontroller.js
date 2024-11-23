@@ -8,27 +8,37 @@ const Role = require('../models/role');
 
 
 
-const meController = (req, res) => {
-    const token = req.cookies.token; // Récupère le token depuis le cookie
-
-    if (!token) {
-        return res.status(401).json({ message: 'Not authenticated' });
-    }
-
+const meController = async (req, res) => {
     try {
+        const token = req.cookies.token; // Récupère le token du cookie
+
+        if (!token) {
+            return res.status(401).json({ message: 'Not authenticated' });
+        }
+
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        res.status(200).json({
+
+        const user = await User.findById(decoded.userid).select('firstname lastname email roleid');
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        return res.status(200).json({
             user: {
-                userid: decoded.userid,
-                email: decoded.email,
-                roleid: decoded.roleid,
+                userid: user._id,
+                firstname: user.firstname,
+                lastname: user.lastname,
+                email: user.email,
+                roleid: user.roleid,
             },
         });
     } catch (err) {
         console.error('Error in /me endpoint:', err.message);
-        res.status(401).json({ message: 'Invalid or expired token' });
+        return res.status(401).json({ message: 'Invalid or expired token' });
     }
 };
+
+
 
 const registerController = async (req, res) => {
     try {
@@ -94,34 +104,34 @@ const loginController = async (req, res) => {
             { 
                 userid: user._id,
                 email: user.email,
-                roleid: user.roleid
+                roleid: user.roleid,
+                firstname: user.firstname,
+                lastname: user.lastname,
             },
             process.env.JWT_SECRET, 
             { expiresIn: '1h' }
         );
 
-        // Envoyer le token dans un cookie HTTP-only
         res.cookie('token', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // Assurez-vous d'activer `secure` en production
-            sameSite: 'strict', // Empêche l'accès intersite
-            maxAge: 3600000 // 1 heure
+            secure: process.env.NODE_ENV === 'production', // Activer en production
+            sameSite: 'strict', // Bloque les requêtes cross-site
+            maxAge: 3600000, // 1 heure
         });
 
-        // Réponse pour confirmer la connexion
-        res.status(200).json({
+        return res.status(200).json({
             message: 'Login successful',
             user: {
                 userid: user._id,
                 firstname: user.firstname,
                 lastname: user.lastname,
                 email: user.email,
-                roleid: user.roleid
-            }
+                roleid: user.roleid,
+            },
         });
     } catch (error) {
         console.error('Error during login:', error);
-        res.status(500).json({ message: 'An error occurred during login' });
+        return res.status(500).json({ message: 'An error occurred during login' });
     }
 };
 
@@ -130,14 +140,12 @@ const loginController = async (req, res) => {
 const logoutController = async (req, res) => {
     res.cookie('token', '', {
         httpOnly: true,
-        expires: new Date(0),
-        secure: process.env.NODE_ENV === 'development',
-        sameSite: 'strict'
+        secure: process.env.NODE_ENV === 'production', // Activer seulement en prod
+        sameSite: 'strict',
+        expires: new Date(0), // Expire immédiatement
     });
     res.status(200).json({ message: 'Logged out successfully' });
 };
-
-
 
 
 module.exports = { registerController, loginController, logoutController, meController };
