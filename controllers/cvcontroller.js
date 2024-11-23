@@ -132,7 +132,7 @@ const deleteCV = async (req, res) => {
 // Get all CVs
 const getAllCVs = async (req, res) => {
     try {
-        const cvs = await CV.find()
+        const cvs = await CV.find({ statusid: process.env.STATUS_PUBLIC_ID })
             .populate('education')
             .populate('experiences')
             .populate('hobbies');
