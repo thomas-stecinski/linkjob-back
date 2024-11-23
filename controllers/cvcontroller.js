@@ -4,11 +4,29 @@ const Experience = require('../models/experiences');
 const Hobbies = require('../models/hobbies');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-
+const mapStatus = require('../utils/mapStatus');
 dotenv.config();
 
 // Create a new CV
 const createCV = async (req, res) => {
+    try {
+        const { userid } = req.body;
+        
+        // Check if user already has a CV
+        const existingCV = await CV.findOne({ userid });
+        if (existingCV) {
+            return res.status(400).json({
+                success: false,
+                message: 'User already has a CV'
+            });
+        }
+    } catch (error) {
+        return res.status(500).json({
+            success: false, 
+            message: 'Error checking existing CV',
+            error: error.message
+        });
+    }
     try {
         const { firstname, lastname, title, location, summary, userid } = req.body;
         const newCV = new CV({
@@ -35,13 +53,13 @@ const createCV = async (req, res) => {
     }
 };
 
-// Update CV
 const updateCV = async (req, res) => {
     try {
-        const { cvId, firstname, lastname, title, location, summary, statusid } = req.body;
-        const userid = req.user.id;
+        const { cvid, firstname, lastname, title, location, summary, userid, status_label} = req.body;
 
-        const cv = await CV.findOne({ id: cvId, userid });
+        const statusid = mapStatus(status_label);
+
+        const cv = await CV.findOne({ _id: cvid, userid });
         
         if (!cv) {
             return res.status(404).json({
@@ -51,7 +69,7 @@ const updateCV = async (req, res) => {
         }
 
         const updatedCV = await CV.findOneAndUpdate(
-            { id: cvId },
+            { _id: cvid },
             {
                 firstname,
                 lastname,
@@ -79,10 +97,9 @@ const updateCV = async (req, res) => {
 // Delete CV
 const deleteCV = async (req, res) => {
     try {
-        const { cvId } = req.body;
-        const userid = req.user.id;
+        const { cvid, userid } = req.body;
 
-        const cv = await CV.findOne({ id: cvId, userid });
+        const cv = await CV.findOne({ _id: cvid, userid });
         
         if (!cv) {
             return res.status(404).json({
@@ -97,7 +114,7 @@ const deleteCV = async (req, res) => {
         await Hobbies.deleteMany({ cvid: cv._id });
         
         // Delete the CV
-        await CV.findOneAndDelete({ id: cvId });
+        await CV.findOneAndDelete({ _id: cvid });
 
         res.status(200).json({
             success: true,
