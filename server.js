@@ -1,4 +1,3 @@
-// launch server
 const express = require('express');
 const cors = require('cors');
 const app = express();
@@ -7,22 +6,32 @@ const dotenv = require('dotenv');
 const router = require('./routes/router'); 
 const cookieParser = require('cookie-parser');
 
+dotenv.config();
+
+// Configure CORS
+app.use(cors({
+    origin: 'http://localhost:3000', // URL de votre frontend
+    credentials: true, // Permet l'envoi des cookies
+}));
+
+// Middlewares
 app.use(express.json());
-app.use(cors());
 app.use(cookieParser());
+
+// Routes
 app.use('/api', router);
 
-dotenv.config();
+// Database Connection
 mongoose
     .connect(process.env.DB_URL)
     .then(() => {
-        console.log('Connection has been etablished successfully');
+        console.log('Connection has been established successfully');
     })
     .catch((error) => {
-        console.error('Unable to connect database: ', error);
+        console.error('Unable to connect to the database: ', error);
     });
 
-
-app.listen(3000, () => {
-    console.log('Server is running on port 3000');
+// Start the server
+app.listen(8000, () => {
+    console.log('Server is running on port 8000');
 });
