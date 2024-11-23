@@ -1,7 +1,6 @@
 // auth controllers
 
 const bcrypt = require('bcrypt');
-const { v4: uuidv4 } = require('uuid');
 const User = require('../models/user');
 const jwt = require('jsonwebtoken');
 
@@ -22,7 +21,6 @@ const registerController = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, salt);
 
         const newUser = new User({
-            uuid: uuidv4(), 
             firstname,
             lastname,
             email,
@@ -58,16 +56,29 @@ const loginController = async (req, res) => {
         }
 
         const token = jwt.sign(
-            { uuid: user.uuid, email: user.email, roleid: user.roleid },
+            { 
+                userid: user._id,
+                email: user.email,
+                roleid: user.roleid
+            },
             process.env.JWT_SECRET, 
             { expiresIn: '1h' }
         );
 
+
+        // Set ONLY the token in HTTP-only cookie
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 3600000 // 1 hour
+        });
+
+        // Send user data in response body for initial client-side state
         res.status(200).json({ 
             message: 'Login successful', 
-            token, 
             user: {
-                uuid: user.uuid,
+                userid: user._id,
                 firstname: user.firstname,
                 lastname: user.lastname,
                 email: user.email,
@@ -80,4 +91,14 @@ const loginController = async (req, res) => {
     }
 };
 
-module.exports = { registerController, loginController };
+const logoutController = async (req, res) => {
+    res.cookie('token', '', {
+        httpOnly: true,
+        expires: new Date(0),
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict'
+    });
+    res.status(200).json({ message: 'Logged out successfully' });
+};
+
+module.exports = { registerController, loginController, logoutController };

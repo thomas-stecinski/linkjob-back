@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const seedRoles = require('./roleSeeder');
+const seedStatuses = require('./statusSeeder');
 require('dotenv').config();
 
 const runSeeders = async () => {
@@ -12,7 +13,7 @@ const runSeeders = async () => {
         
         // Run seeders
         await seedRoles();
-        
+        await seedStatuses();
         console.log('Database seeded successfully!');
         process.exit(0);
     } catch (error) {

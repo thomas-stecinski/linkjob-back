@@ -3,12 +3,6 @@ const Schema = mongoose.Schema;
 const { v4: uuidv4 } = require('uuid');
 
 const experienceSchema = new Schema({
-    id: {
-        type: String,
-        unique: true,
-        index:true,
-        default: () => uuidv4()
-    },
     cvid: {
         type: Schema.Types.ObjectId,
         ref: 'CV',

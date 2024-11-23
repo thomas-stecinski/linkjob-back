@@ -3,11 +3,6 @@ const Schema = mongoose.Schema;
 const { v4: uuidv4 } = require('uuid');
 
 const recommendationSchema = new Schema({
-    id: {
-        type: String,
-        unique: true,
-        default: () => uuidv4()
-    },
     commentatorid: {
         type: Schema.Types.ObjectId,
         ref: 'User',

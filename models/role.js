@@ -3,11 +3,6 @@ const Schema = mongoose.Schema;
 const { v4: uuidv4 } = require('uuid');
 
 const roleSchema = new Schema({
-    id: {
-        type: String,
-        unique: true,
-        default: () => uuidv4()
-    },
     name: {
         type: String,
         required: true,

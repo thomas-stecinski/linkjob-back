@@ -4,11 +4,6 @@ const { v4: uuidv4 } = require('uuid');
 
 
 const cvSchema = new Schema({
-    id: {
-        type: String,
-        unique: true,
-        default: () => uuidv4()
-    },
     userid: {
         type: Schema.Types.ObjectId,
         ref: 'User',
@@ -46,10 +41,11 @@ const cvSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'Hobbies'
     }],
-    statusuuid: {
-        type: String,
+    statusid: {
+        type: Schema.Types.ObjectId,
+        ref: 'Status',
         required: true
-    },
+    },  
 }, { timestamps: true });
 
 module.exports = mongoose.model('CV', cvSchema);

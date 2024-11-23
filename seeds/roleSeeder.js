@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Role = require('../models/role');
+const updateEnvFile = require('../utils/envUpdater');
 
 const roles = [
     {
@@ -37,14 +38,20 @@ const roles = [
     }
 ];
 
+
+
 const seedRoles = async () => {
     try {
-        // Clear existing roles
         await Role.deleteMany({});
-        
-        // Insert new roles
         const createdRoles = await Role.insertMany(roles);
         
+        const envUpdates = {};
+        createdRoles.forEach((role) => {
+            const key = `ROLE_${role.name.toUpperCase()}_ID`;
+            envUpdates[key] = role._id.toString();
+        });
+        
+        updateEnvFile(envUpdates);
         console.log('Roles seeded successfully:', createdRoles);
         return createdRoles;
     } catch (error) {

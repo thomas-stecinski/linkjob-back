@@ -5,10 +5,11 @@ const app = express();
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const router = require('./routes/router'); 
+const cookieParser = require('cookie-parser');
 
 app.use(express.json());
 app.use(cors());
-
+app.use(cookieParser());
 app.use('/api', router);
 
 dotenv.config();

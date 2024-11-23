@@ -1,0 +1,42 @@
+ {
+    label: 'Public',
+    _id: new ObjectId('6741a5692bdd55a196a686f2'),
+    __v: 0,
+    createdAt: 2024-11-23T09:50:33.772Z,
+    updatedAt: 2024-11-23T09:50:33.772Z
+  },
+  {
+    label: 'Private',
+    _id: new ObjectId('6741a5692bdd55a196a686f3'),
+    __v: 0,
+    createdAt: 2024-11-23T09:50:33.772Z,
+    updatedAt: 2024-11-23T09:50:33.772Z
+  },
+  {
+    label: 'Inactive',
+    _id: new ObjectId('6741a5692bdd55a196a686f4'),
+    __v: 0,
+    createdAt: 2024-11-23T09:50:33.772Z,
+    updatedAt: 2024-11-23T09:50:33.772Z
+  },
+  {
+    label: 'Draft',
+    _id: new ObjectId('6741a5692bdd55a196a686f5'),
+    __v: 0,
+    createdAt: 2024-11-23T09:50:33.772Z,
+    updatedAt: 2024-11-23T09:50:33.772Z
+  },
+  {
+    label: 'Deleted',
+    _id: new ObjectId('6741a5692bdd55a196a686f6'),
+    __v: 0,
+    createdAt: 2024-11-23T09:50:33.772Z,
+    updatedAt: 2024-11-23T09:50:33.772Z
+  },
+  {
+    label: 'Pending',
+    _id: new ObjectId('6741a5692bdd55a196a686f7'),
+    __v: 0,
+    createdAt: 2024-11-23T09:50:33.772Z,
+    updatedAt: 2024-11-23T09:50:33.772Z
+  }

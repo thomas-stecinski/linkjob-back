@@ -3,11 +3,6 @@ const Schema = mongoose.Schema;
 const { v4: uuidv4 } = require('uuid');
 
 const userSchema = new Schema({
-    id: {
-        type: String,
-        unique: true,
-        default: () => uuidv4()
-    },
     firstname: {
         type: String,
         required: true
