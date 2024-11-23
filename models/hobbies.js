@@ -9,12 +9,12 @@ const hobbiesSchema = new Schema({
         index: true,
         default: () => uuidv4()
     },
-    cvId: {
+    cvid: {
         type: Schema.Types.ObjectId,
         ref: 'CV',
         required: true
     },
-    userId: {
+    userid: {
         type: Schema.Types.ObjectId,
         ref: 'User',
         required: true

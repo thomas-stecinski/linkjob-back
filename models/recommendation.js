@@ -8,17 +8,17 @@ const recommendationSchema = new Schema({
         unique: true,
         default: () => uuidv4()
     },
-    commentatorId: {
+    commentatorid: {
         type: Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
-    authorId: {
+    authorid: {
         type: Schema.Types.ObjectId, 
         ref: 'User',
         required: true
     },
-    cvId: {
+    cvid: {
         type: Schema.Types.ObjectId,
         ref: 'CV',
         required: true
@@ -27,7 +27,7 @@ const recommendationSchema = new Schema({
         type: String,
         required: true
     },
-    statusId: {
+    statusid: {
         type: Schema.Types.ObjectId,
         ref: 'Status',
         required: true

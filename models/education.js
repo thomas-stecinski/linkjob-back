@@ -8,17 +8,17 @@ const educationSchema = new Schema({
         index:true,
         default: () => uuidv4()
     },
-    cvId: {
+    cvid: {
         type: Schema.Types.ObjectId,
         ref: 'CV',
         required: true
     },
-    userId: {
+    userid: {
         type: Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
-    statusId: {
+    statusid: {
         type: Schema.Types.ObjectId,
         ref: 'Status',
         required: true
@@ -31,11 +31,11 @@ const educationSchema = new Schema({
         type: String,
         required: true
     },
-    startDate: {
+    startdate: {
         type: Date,
         required: false
     },
-    endDate: {
+    enddate: {
         type: Date,
         required: false
     },

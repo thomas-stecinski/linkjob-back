@@ -8,9 +8,9 @@ require('dotenv').config();
 
 router.post('/register', async (req, res) => {
     try {
-        const { firstname, lastname, email, password, roleId } = req.body;
+        const { firstname, lastname, email, password, roleid } = req.body;
 
-        if (!firstname || !lastname || !email || !password || !roleId) {
+        if (!firstname || !lastname || !email || !password || !roleid) {
             return res.status(400).json({ message: 'All fields are required' });
         }
 
@@ -28,7 +28,7 @@ router.post('/register', async (req, res) => {
             lastname,
             email,
             password: hashedPassword,
-            roleId
+            roleid
         });
 
         await newUser.save();
@@ -36,7 +36,7 @@ router.post('/register', async (req, res) => {
         res.status(201).json({ message: 'User registered successfully' });
     } catch (error) {
         console.error('Error during registration:', error);
-        res.status(500).json({ message: 'An error occurred during registration' });
+        res.status(500).json({ message: `An error occurred during registration: ${error.message}` });
     }
 });
 
@@ -59,7 +59,7 @@ router.post('/login', async (req, res) => {
         }
 
         const token = jwt.sign(
-            { uuid: user.uuid, email: user.email, roleId: user.roleId },
+            { uuid: user.uuid, email: user.email, roleid: user.roleid },
             process.env.JWT_SECRET, 
             { expiresIn: '1h' }
         );
@@ -72,7 +72,7 @@ router.post('/login', async (req, res) => {
                 firstname: user.firstname,
                 lastname: user.lastname,
                 email: user.email,
-                roleId: user.roleId
+                roleid: user.roleid
             }
         });
     } catch (error) {

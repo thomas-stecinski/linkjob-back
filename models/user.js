@@ -8,11 +8,11 @@ const userSchema = new Schema({
         unique: true,
         default: () => uuidv4()
     },
-    firstName: {
+    firstname: {
         type: String,
         required: true
     },
-    lastName: {
+    lastname: {
         type: String,
         required: true
     },
@@ -25,7 +25,7 @@ const userSchema = new Schema({
         required: true,
         unique: true
     },
-    roleId: {
+    roleid: {
         type: Schema.Types.ObjectId,
         ref: 'Role',
         required: true,
