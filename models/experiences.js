@@ -32,9 +32,8 @@ const experienceSchema = new Schema({
     description: {
         type: String,
         required: true
-    }
+    },
 }, { timestamps: true });
-experienceSchema.index({ createdAt: 1 });
-experienceSchema.index({ cvId: 1, userId: 1 }, { unique: true });
+
 
 module.exports = mongoose.model('Experience', experienceSchema);

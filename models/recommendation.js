@@ -28,7 +28,6 @@ const recommendationSchema = new Schema({
         required: true
     }
 }, { timestamps: true });
-recommendationSchema.index({ createdAt: 1 });
-recommendationSchema.index({ cvId: 1, authorId: 1 }, { unique: true });
+
 
 module.exports = mongoose.model('Recommendation', recommendationSchema);

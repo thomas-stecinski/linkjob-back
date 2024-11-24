@@ -18,7 +18,6 @@ const hobbiesSchema = new Schema({
         required: true,
     }
 }, { timestamps: true });
-hobbiesSchema.index({ createdAt: 1 });
-hobbiesSchema.index({ cvId: 1, userId: 1 }, { unique: true });
+
 
 module.exports = mongoose.model('Hobbies', hobbiesSchema);

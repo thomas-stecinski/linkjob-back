@@ -37,10 +37,6 @@ const educationSchema = new Schema({
     description: {
         type: String,
         required: true,
-    },
+    }
 }, { timestamps: true });
-
-// Correction de l'index
-educationSchema.index({ cvid: 1, userid: 1 }, { unique: true });
-
 module.exports = mongoose.model('Education', educationSchema);

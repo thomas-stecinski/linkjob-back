@@ -46,5 +46,4 @@ const cvSchema = new Schema({
         required: true
     },  
 }, { timestamps: true });
-
 module.exports = mongoose.model('CV', cvSchema);
