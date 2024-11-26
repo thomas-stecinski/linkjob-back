@@ -14,7 +14,10 @@ const createCV = async (req, res) => {
 
     try {
         const { userid, firstname, lastname, title, location, summary, education, experiences, hobbies, status_label } = req.body;
-
+        if (typeof status_label !== 'string') {
+            throw new Error('Invalid status_label format');
+        }
+        
         // Vérification de l'existence du CV
         const existingCV = await CV.findOne({ userid });
         if (existingCV) {
@@ -23,10 +26,10 @@ const createCV = async (req, res) => {
                 message: 'User already has a CV',
             });
         }
-
+       
         // Mapping du statut
         const statusid = mapStatus(status_label);
-
+        
         // Création du CV principal
         const newCV = new CV({
             userid,
@@ -139,22 +142,79 @@ const createCV = async (req, res) => {
 
 
 const updateCV = async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
-        const { cvid, firstname, lastname, title, location, summary, userid, status_label} = req.body;
-
-        const statusid = mapStatus(status_label);
-
-        const cv = await CV.findOne({ _id: cvid, userid });
+        // Validate required fields
+        const requiredFields = ['cvid', 'userid', 'firstname', 'lastname', 'title', 'status_label'];
+        const missingFields = requiredFields.filter(field => !req.body[field]);
         
-        if (!cv) {
+        if (missingFields.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Missing required fields',
+                details: `Missing: ${missingFields.join(', ')}`
+            });
+        }
+
+        const { 
+            cvid, 
+            firstname, 
+            lastname, 
+            title, 
+            location, 
+            summary, 
+            userid,
+            status_label,
+            education,
+            experiences,
+            hobbies 
+        } = req.body;
+
+        // Validate ObjectId format
+        if (!mongoose.Types.ObjectId.isValid(cvid) || !mongoose.Types.ObjectId.isValid(userid)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid ID format',
+                details: 'cvid and userid must be valid MongoDB ObjectIds'
+            });
+        }
+
+        // Find and validate CV existence and ownership
+        const existingCV = await CV.findOne({ _id: cvid });
+        if (!existingCV) {
             return res.status(404).json({
                 success: false,
                 message: 'CV not found'
             });
         }
+        
+        if (existingCV.userid.toString() !== userid) {
+            return res.status(403).json({
+                success: false,
+                message: 'You are not authorized to update this CV'
+            });
+        }
 
+        // Validate and map status
+        let statusid;
+        try {
+            statusid = mapStatus(status_label);
+            if (!statusid) {
+                throw new Error('Invalid status');
+            }
+        } catch (error) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid status_label',
+                details: 'status_label must be a valid status string'
+            });
+        }
+
+        // Update main CV
         const updatedCV = await CV.findOneAndUpdate(
-            { _id: cvid },
+            { _id: cvid, userid },
             {
                 firstname,
                 lastname,
@@ -163,19 +223,104 @@ const updateCV = async (req, res) => {
                 summary,
                 statusid
             },
-            { new: true }
+            { new: true, session }
         );
+
+        // Validate education data if present
+        if (education) {
+            const invalidEducation = education.find(edu => !edu.degree || !edu.institution);
+            if (invalidEducation) {
+                throw new Error('Each education entry must have degree and institution');
+            }
+        }
+
+        // Validate experience data if present
+        if (experiences) {
+            const invalidExperience = experiences.find(exp => !exp.role || !exp.company);
+            if (invalidExperience) {
+                throw new Error('Each experience entry must have role and company');
+            }
+        }
+
+        // Update education records
+        if (education) {
+            await Education.deleteMany({ cvid }, { session });
+            const savedEducation = await Education.insertMany(
+                education.map(edu => ({
+                    ...edu,
+                    cvid,
+                    userid,
+                    statusid
+                })),
+                { session }
+            );
+            updatedCV.education = savedEducation.map(edu => edu._id);
+        }
+
+        // Update experience records
+        if (experiences) {
+            await Experience.deleteMany({ cvid }, { session });
+            const savedExperiences = await Experience.insertMany(
+                experiences.map(exp => ({
+                    ...exp,
+                    cvid,
+                    userid
+                })),
+                { session }
+            );
+            updatedCV.experiences = savedExperiences.map(exp => exp._id);
+        }
+
+        // Update hobbies
+        if (hobbies) {
+            await Hobbies.deleteMany({ cvid }, { session });
+            const hobbiesToInsert = hobbies.map(hobby => ({
+        hobby: hobby.hobby, // Extract just the hobby text
+        cvid,
+        userid
+    }));
+    
+    const savedHobbies = await Hobbies.insertMany(
+        hobbiesToInsert,
+        { session }
+    );
+            updatedCV.hobbies = savedHobbies.map(hobby => hobby._id);
+        }
+
+        await updatedCV.save({ session });
+        await session.commitTransaction();
 
         res.status(200).json({
             success: true,
             data: updatedCV
         });
     } catch (error) {
+        await session.abortTransaction();
+        
+        // Handle specific known errors
+        if (error.message.includes('degree and institution')) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid education data',
+                error: error.message
+            });
+        }
+        
+        if (error.message.includes('role and company')) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid experience data',
+                error: error.message
+            });
+        }
+
         res.status(500).json({
             success: false,
             message: 'Error updating CV',
             error: error.message
         });
+    } finally {
+        session.endSession();
     }
 };
 
@@ -239,6 +384,22 @@ const getAllCVs = async (req, res) => {
 const getUserCV = async (req, res) => {
     try {
         const { iduser } = req.params;
+        const isPublic = await CV.findOne({ userid: iduser, statusid: process.env.STATUS_PUBLIC_ID });
+
+        // check if req userid is the same as the userid of the cv
+        if (isPublic && isPublic.userid.toString() !== iduser) {
+            return res.status(403).json({
+                success: false,
+                message: 'CV is not public'
+            });
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(iduser)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid user ID format'
+            });
+        }
 
         const cv = await CV.findOne({ userid: iduser })
             .populate('education')
