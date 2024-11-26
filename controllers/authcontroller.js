@@ -114,9 +114,12 @@ const loginController = async (req, res) => {
 
         res.cookie('token', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // Activer en production
-            sameSite: 'strict', // Bloque les requêtes cross-site
-            maxAge: 3600000, // 1 heure
+            secure: true, 
+            sameSite: 'none',
+            maxAge: 3600000, 
+            domain: process.env.NODE_ENV === 'production' 
+                ? '.onrender.com'
+                : 'localhost'
         });
 
         return res.status(200).json({
