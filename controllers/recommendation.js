@@ -1,5 +1,40 @@
-const Recommendation = require('../models/recommendation');
-const { v4: uuidv4 } = require('uuid');
+const Recommendation = require('../models/recommendation'); // Modèle Recommendation
+const mongoose = require('mongoose'); // Nécessaire pour manipuler ObjectId
+
+exports.deleteRecommendation = async (req, res) => {
+    const { id } = req.params; // ID de la recommandation
+
+    try {
+        // Vérifiez que l'ID de la recommandation est valide
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({
+                success: false,
+                message: 'ID de recommandation invalide.',
+            });
+        }
+
+        // Trouver et supprimer la recommandation
+        const recommendation = await Recommendation.findByIdAndDelete(id);
+
+        if (!recommendation) {
+            return res.status(404).json({
+                success: false,
+                message: 'Recommandation introuvable.',
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Recommandation supprimée avec succès.',
+        });
+    } catch (error) {
+        console.error('Erreur lors de la suppression de la recommandation :', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Erreur interne.',
+        });
+    }
+};
 
 exports.addRecommendation = async (req, res) => {
     const { cvid, text } = req.body;
@@ -37,29 +72,47 @@ exports.addRecommendation = async (req, res) => {
     }
 };
 
-
-
-exports.deleteRecommendation = async (req, res) => {
-    const { id } = req.params;
+exports.editRecommendation = async (req, res) => {
+    const { id } = req.params; // ID de la recommandation
+    const { text } = req.body; // Nouveau texte
 
     try {
+        // Vérifiez que l'ID est valide
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({
+                success: false,
+                message: 'ID de recommandation invalide.',
+            });
+        }
+
+        // Trouver la recommandation par son ID
         const recommendation = await Recommendation.findById(id);
 
         if (!recommendation) {
-            return res.status(404).json({ success: false, message: 'Recommandation introuvable.' });
+            return res.status(404).json({
+                success: false,
+                message: 'Recommandation introuvable.',
+            });
         }
 
-        if (recommendation.userID.toString() !== req.user.userid) {
-            return res.status(403).json({ success: false, message: 'Vous n\'êtes pas autorisé à supprimer cette recommandation.' });
-        }
+        // Mettre à jour le texte de la recommandation
+        recommendation.text = text;
+        await recommendation.save();
 
-        await Recommendation.findByIdAndDelete(id);
-        res.status(200).json({ success: true, message: 'Recommandation supprimée avec succès.' });
+        return res.status(200).json({
+            success: true,
+            message: 'Recommandation mise à jour avec succès.',
+            recommendation,
+        });
     } catch (error) {
-        console.error('Erreur lors de la suppression de la recommandation :', error);
-        res.status(500).json({ success: false, message: 'Erreur interne.' });
+        console.error('Erreur lors de la modification de la recommandation :', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Erreur interne.',
+        });
     }
 };
+
 
 exports.getRecommendations = async (req, res) => {
     const { cvid } = req.params;
@@ -75,7 +128,3 @@ exports.getRecommendations = async (req, res) => {
         res.status(500).json({ message: 'Erreur interne.' });
     }
 };
-
-
-
-

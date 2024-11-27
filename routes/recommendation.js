@@ -4,7 +4,8 @@ const authMiddleware = require('../middlewares/authmiddleware');
 const {
   getRecommendations,
   addRecommendation,
-  deleteRecommendation, // Ajoutez cette ligne pour inclure la fonction delete
+  deleteRecommendation,
+  editRecommendation, // Ajout de la fonction d'édition
 } = require('../controllers/recommendation');
 
 // Route pour récupérer les recommandations
@@ -16,5 +17,7 @@ router.post('/add-recommendation', authMiddleware, addRecommendation);
 // Route pour supprimer une recommandation
 router.delete('/delete/:id', authMiddleware, deleteRecommendation);
 
+// Route pour modifier une recommandation
+router.put('/edit/:id', authMiddleware, editRecommendation);
 
 module.exports = router;
