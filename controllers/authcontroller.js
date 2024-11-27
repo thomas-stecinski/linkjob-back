@@ -10,33 +10,20 @@ const Role = require('../models/role');
 
 const meController = async (req, res) => {
     try {
-        const token = req.cookies.token; // Récupère le token du cookie
-
-        if (!token) {
-            return res.status(401).json({ message: 'Not authenticated' });
+        if (!req.session || !req.session.user) {
+            return res.status(401).json({ message: 'Non authentifié.' });
         }
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-        const user = await User.findById(decoded.userid).select('firstname lastname email roleid');
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
+        // Retourne les données utilisateur de la session
         return res.status(200).json({
-            user: {
-                userid: user._id,
-                firstname: user.firstname,
-                lastname: user.lastname,
-                email: user.email,
-                roleid: user.roleid,
-            },
+            user: req.session.user,
         });
-    } catch (err) {
-        console.error('Error in /me endpoint:', err.message);
-        return res.status(401).json({ message: 'Invalid or expired token' });
+    } catch (error) {
+        console.error('Erreur dans le contrôleur /me :', error);
+        return res.status(500).json({ message: 'Une erreur est survenue.' });
     }
 };
+
 
 
 
@@ -87,67 +74,50 @@ const loginController = async (req, res) => {
         const { email, password } = req.body;
 
         if (!email || !password) {
-            return res.status(400).json({ message: 'Email and password are required' });
+            return res.status(400).json({ message: 'Email et mot de passe requis.' });
         }
 
         const user = await User.findOne({ email });
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(404).json({ message: 'Utilisateur introuvable.' });
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            return res.status(401).json({ message: 'Invalid credentials' });
+            return res.status(401).json({ message: 'Identifiants invalides.' });
         }
 
-        const token = jwt.sign(
-            { 
-                userid: user._id,
-                email: user.email,
-                roleid: user.roleid,
-                firstname: user.firstname,
-                lastname: user.lastname,
-            },
-            process.env.JWT_SECRET, 
-            { expiresIn: '1h' }
-        );
-
-        res.cookie('token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-            maxAge: 3600000, 
-            domain: process.env.NODE_ENV === 'production' 
-                ? '.onrender.com'
-                : 'localhost'
-        });
+        // Stocker les informations utilisateur dans la session
+        req.session.user = {
+            userid: user._id,
+            email: user.email,
+            roleid: user.roleid,
+            firstname: user.firstname,
+            lastname: user.lastname,
+        };
 
         return res.status(200).json({
-            message: 'Login successful',
-            user: {
-                userid: user._id,
-                firstname: user.firstname,
-                lastname: user.lastname,
-                email: user.email,
-                roleid: user.roleid,
-            },
+            message: 'Connexion réussie.',
+            user: req.session.user, // Renvoie les données utilisateur
         });
     } catch (error) {
-        console.error('Error during login:', error);
-        return res.status(500).json({ message: 'An error occurred during login' });
+        console.error('Erreur lors de la connexion :', error);
+        return res.status(500).json({ message: 'Une erreur est survenue.' });
     }
 };
 
 
 
 const logoutController = async (req, res) => {
-    res.cookie('token', '', {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production', // Activer seulement en prod
-        sameSite: 'strict',
-        expires: new Date(0), // Expire immédiatement
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('Erreur lors de la déconnexion :', err);
+            return res.status(500).json({ message: 'Une erreur est survenue.' });
+        }
+
+        res.clearCookie('connect.sid'); // Efface le cookie de session
+        return res.status(200).json({ message: 'Déconnexion réussie.' });
     });
-    res.status(200).json({ message: 'Logged out successfully' });
 };
 
 

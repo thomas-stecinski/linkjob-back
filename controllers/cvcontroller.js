@@ -382,46 +382,69 @@ const getAllCVs = async (req, res) => {
 
 // Get CV by user ID
 const getUserCV = async (req, res) => {
+    const { userid } = req.params;
+  
     try {
-        const { iduser } = req.params;
-        const isPublic = await CV.findOne({ userid: iduser, statusid: process.env.STATUS_PUBLIC_ID });
+      if (!userid) {
+        return res.status(400).json({
+          success: false,
+          message: "ID utilisateur manquant.",
+        });
+      }
+  
+      const cv = await CV.findOne({ userid }).populate("education experiences hobbies");
+  
+      if (!cv) {
+        return res.status(404).json({
+          success: false,
+          message: "CV introuvable.",
+        });
+      }
+  
+      res.status(200).json({
+        success: true,
+        data: cv,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: "Erreur lors de la récupération du CV.",
+        error: error.message,
+      });
+    }
+  };
+  
 
-        // check if req userid is the same as the userid of the cv
-        if (isPublic && isPublic.userid.toString() !== iduser) {
-            return res.status(403).json({
-                success: false,
-                message: 'CV is not public'
-            });
-        }
+const checkUserCV = async (req, res) => {
+    try {
+        const { userid } = req.params;
 
-        if (!mongoose.Types.ObjectId.isValid(iduser)) {
+        if (!mongoose.Types.ObjectId.isValid(userid)) {
             return res.status(400).json({
                 success: false,
-                message: 'Invalid user ID format'
+                message: 'Invalid user ID format',
             });
         }
 
-        const cv = await CV.findOne({ userid: iduser })
-            .populate('education')
-            .populate('experiences')
-            .populate('hobbies');
+        const existingCV = await CV.findOne({ userid });
 
-        if (!cv) {
-            return res.status(404).json({
-                success: false,
-                message: 'CV not found for this user'
+        if (!existingCV) {
+            return res.status(200).json({
+                success: true,
+                hasCV: false,
             });
         }
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
-            data: cv
+            hasCV: true,
+            cvId: existingCV._id, // Retourne l'ID du CV si trouvé
         });
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: 'Error fetching user CV',
-            error: error.message
+            message: 'Error checking CV',
+            error: error.message,
         });
     }
 };
@@ -431,5 +454,6 @@ module.exports = {
     updateCV,
     deleteCV,
     getAllCVs,
-    getUserCV
+    getUserCV,
+    checkUserCV, // Ajoutez cette méthode ici
 };
