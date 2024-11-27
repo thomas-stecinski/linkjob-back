@@ -1,20 +1,19 @@
-//Auth middleware
-
 const jwt = require('jsonwebtoken');
 
 const authMiddleware = (req, res, next) => {
-    const token = req.cookies?.token; // Vérifiez que le token est présent dans les cookies
+    const token = req.cookies?.token || req.headers.authorization?.split(' ')[1];
 
     if (!token) {
-        return res.status(401).json({ message: 'Authentication required' });
+        return res.status(401).json({ message: 'Authentification requise.' });
     }
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded; // Passez les données décodées à la requête
+        const decoded = jwt.verify(token, process.env.JWT_SECRET); // Décodage du token
+        req.user = decoded; // Ajout des données utilisateur à req.user
         next();
     } catch (error) {
-        return res.status(403).json({ message: 'Invalid token' });
+        console.error('Erreur JWT :', error.message);
+        return res.status(403).json({ message: 'Token invalide ou expiré.' });
     }
 };
 

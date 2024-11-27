@@ -5,15 +5,12 @@ const recommendationSchema = new Schema(
     {
         commentatorid: {
             type: Schema.Types.ObjectId,
-            ref: 'User',
+            ref: 'User', // Référence au modèle User
             required: true,
         },
-        firstname: {
-            type: String,
-            required: true,
-        },
-        lastname: {
-            type: String,
+        userID: { 
+            type: Schema.Types.ObjectId,
+            ref: 'User', // Ajout explicite pour stocker l'ID utilisateur
             required: true,
         },
         cvid: {
