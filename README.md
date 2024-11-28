@@ -39,7 +39,7 @@ JWT_SECRET=<your JWT secret>
 ### Documentation api
 Pour consulter la documentation api du projet:
 ```bash
-<your address>/api/api-docs
+https://linkjob-back.onrender.com/api/api-docs/
 ```
 ### Routes Authentification:
 
