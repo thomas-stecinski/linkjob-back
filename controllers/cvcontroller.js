@@ -383,36 +383,50 @@ const getAllCVs = async (req, res) => {
 // Get CV by user ID
 const getUserCV = async (req, res) => {
     const { userid } = req.params;
-  
+
     try {
-      if (!userid) {
-        return res.status(400).json({
-          success: false,
-          message: "ID utilisateur manquant.",
+        if (!userid) {
+            return res.status(400).json({
+                success: false,
+                message: "ID utilisateur manquant.",
+            });
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(userid)) {
+            return res.status(400).json({
+                success: false,
+                message: "Format d'ID utilisateur invalide.",
+            });
+        }
+
+        const cv = await CV.findOne({ userid })
+            .populate("education")
+            .populate("experiences")
+            .populate("hobbies")
+            .populate("userid", "firstname lastname email");
+
+        if (!cv) {
+            return res.status(404).json({
+                success: false,
+                message: "CV introuvable pour cet utilisateur.",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            data: cv,
         });
-      }
-  
-      const cv = await CV.findOne({ userid }).populate("education experiences hobbies");
-  
-      if (!cv) {
-        return res.status(404).json({
-          success: false,
-          message: "CV introuvable.",
-        });
-      }
-  
-      res.status(200).json({
-        success: true,
-        data: cv,
-      });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: "Erreur lors de la récupération du CV.",
-        error: error.message,
-      });
+        console.error("Erreur lors de la récupération du CV :", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Erreur serveur.",
+            error: error.message,
+        });
     }
-  };
+};
+
+
   
 
 const checkUserCV = async (req, res) => {
