@@ -5,8 +5,11 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const router = require('./routes/router'); 
 const cookieParser = require('cookie-parser');
-const session = require('express-session'); // Importer express-session
-const MongoStore = require('connect-mongo'); // Importer connect-mongo
+const session = require('express-session'); 
+const MongoStore = require('connect-mongo'); 
+const swaggerJSDoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
+
 
 dotenv.config();
 

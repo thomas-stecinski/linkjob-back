@@ -7,7 +7,6 @@ const dotenv = require('dotenv');
 const mapStatus = require('../utils/mapStatus');
 dotenv.config();
 
-// Create a new CV
 const createCV = async (req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -18,7 +17,6 @@ const createCV = async (req, res) => {
             throw new Error('Invalid status_label format');
         }
         
-        // Vérification de l'existence du CV
         const existingCV = await CV.findOne({ userid });
         if (existingCV) {
             return res.status(400).json({
@@ -327,14 +325,14 @@ const updateCV = async (req, res) => {
 // Delete CV
 const deleteCV = async (req, res) => {
     try {
-        const { cvid, userid } = req.body;
-
+        const { cvid } = req.body;
+        const userid = req.user.userid;
         const cv = await CV.findOne({ _id: cvid, userid });
         
         if (!cv) {
             return res.status(404).json({
                 success: false,
-                message: 'CV not found'
+                message: 'CV not found or you do not have permission to delete it'
             });
         }
 
