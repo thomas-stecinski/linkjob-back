@@ -1,10 +1,20 @@
-const authMiddleware = (req, res, next) => {
-    if (!req.session || !req.session.user) {
-        return res.status(401).json({ message: 'Authentification requise.' });
-    }
+const jwt = require('jsonwebtoken');
 
-    req.user = req.session.user; // Attache les données utilisateur à `req.user`
-    next();
+const authMiddleware = (req, res, next) => {
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(401).json({ message: 'Authentification requise.' });
+        }
+
+        const token = authHeader.split(' ')[1];
+        
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded;
+        next();
+    } catch (error) {
+        return res.status(401).json({ message: 'Token invalide ou expiré.' });
+    }
 };
 
 module.exports = authMiddleware;

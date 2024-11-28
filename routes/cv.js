@@ -7,8 +7,8 @@ const {
     deleteCV,
     getAllCVs,
     getUserCV,
-    checkUserCV // Ajout de checkUserCV ici
-} = require('../controllers/cvcontroller.js'); // Assurez-vous que le chemin est correct
+    checkUserCV 
+} = require('../controllers/cvcontroller.js'); 
 
 router.post('/create-cv', authMiddleware, createCV);
 
@@ -20,6 +20,6 @@ router.get('/get-cv', authMiddleware, getAllCVs);
 
 router.get('/get-cv/:userid', authMiddleware, getUserCV);
 
-router.get('/check/:userid', authMiddleware, checkUserCV); // Maintenant checkUserCV est défini
+router.get('/check/:userid', authMiddleware, checkUserCV); 
 
 module.exports = router;
