@@ -5,10 +5,11 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "seed": "node seeds/index.js",
-    "start": "nodemon server.js",
     "drop": "node utils/dropDB.js",
-    "dev": "nodemon server.js",
-    "prod": "node server.js"
+    "start": "node server.js",
+    "start:dev": "nodemon server.js",
+    "start:prod": "node server.js --env=production"
+    
   },
   "keywords": [],
   "author": "",
