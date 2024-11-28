@@ -34,14 +34,14 @@ JWT_SECRET=<your JWT secret>
 
 ```
 
-##Routes api
+## Routes api
 
-###Documentation api
+### Documentation api
 Pour consulter la documentation api du projet:
 ```bash
 <your address>/api/api-docs
 ```
-###Routes Authentification:
+### Routes Authentification:
 
 Inscription:
 ```bash
@@ -60,7 +60,7 @@ Information user:
 /api/auth/me
 ```
 
-###Routes CVs: 
+### Routes CVs: 
 
 Création cv:
 ```bash
@@ -83,7 +83,7 @@ Récupération cv par user:
 /api/cv/get-cv/:userid
 ```
 
-###Routes Recommendations: 
+### Routes Recommendations: 
 
 Récupération recommendations par cv:
 ```bash
@@ -102,6 +102,6 @@ Edition recommendation:
 api/recommendation/edit/:id
 ```
 
-##By linkjob
+## By linkjob
 
 
